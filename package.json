@@ -1,12 +1,11 @@
 {
   "name": "mithril-slider",
   "version": "0.1.0",
-  "description": "Mithril custom range/slider component",
+  "description": "Mithril custom slider component",
   "keywords": [
     "mithril",
     "component",
-    "slider",
-    "range"
+    "slider"
   ],
   "author": "Mike Linkovich",
   "license": "MIT",

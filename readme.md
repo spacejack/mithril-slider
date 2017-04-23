@@ -1,6 +1,6 @@
-# Mithril Custom Range/Slider Component
+# Mithril Custom Slider Component
 
-A custom range/slider widget component for [Mithril](https://mithril.js.org/) 1.1.
+A custom slider widget component for [Mithril](https://mithril.js.org/) 1.1.
 
 Try a [live demo here](https://spacejack.github.io/mithril-slider/).
 
