@@ -10,6 +10,19 @@ var DEVICE_DELAY = 350;
 function clamp(n, min, max) {
     return Math.min(Math.max(n, min), max);
 }
+var isIOS = !!navigator.userAgent.match(/iPhone|iPad|iPod/i);
+// This is some unbelievable stone-age nonsense.
+// Workaround for webkit bug where event.preventDefault
+// within touchmove handler fails to prevent scrolling.
+var iOSHackAdded = false;
+function applyIOSHack() {
+    // Only apply this hack if iOS, haven't yet applied it,
+    // and only if a component is actually created
+    if (!isIOS || iOSHackAdded)
+        return;
+    window.addEventListener('touchmove', function () { });
+    iOSHackAdded = true;
+}
 /** Given an input value, quantize it to the step size */
 function quantize(val, min, max, step) {
     if (max - min <= 0)
@@ -58,8 +71,8 @@ var mithrilSlider = function mithrilSlider() {
     function onTouchStart(e) {
         if (device === MOUSE)
             return;
-        window.addEventListener('touchmove', onTouchMove);
-        window.addEventListener('touchend', onTouchEnd);
+        elHit.addEventListener('touchmove', onTouchMove);
+        elHit.addEventListener('touchend', onTouchEnd);
         var t = e.changedTouches[0];
         onPress(t.clientX, t.clientY);
     }
@@ -69,8 +82,8 @@ var mithrilSlider = function mithrilSlider() {
         onMove(t.clientX, t.clientY);
     }
     function onTouchEnd(e) {
-        window.removeEventListener('touchmove', onTouchMove);
-        window.removeEventListener('touchend', onTouchEnd);
+        elHit.removeEventListener('touchmove', onTouchMove);
+        elHit.removeEventListener('touchend', onTouchEnd);
         var t = e.changedTouches[0];
         onRelease(t.clientX, t.clientY);
     }
@@ -174,6 +187,7 @@ var mithrilSlider = function mithrilSlider() {
     return {
         oncreate: function (_a) {
             var attrs = _a.attrs, dom = _a.dom;
+            applyIOSHack();
             updateAttrs(attrs);
             elHit = dom;
             elBar = dom.querySelector('.mithril-slider-bar');
@@ -183,12 +197,12 @@ var mithrilSlider = function mithrilSlider() {
             elHit.addEventListener('keydown', onKeyDown);
         },
         onremove: function () {
-            elHit.removeEventListener('mousedown', onMouseDown);
             window.removeEventListener('mousemove', onMouseMove);
             window.removeEventListener('mouseup', onMouseUp);
+            elHit.removeEventListener('mousedown', onMouseDown);
             elHit.removeEventListener('touchstart', onTouchStart);
-            window.removeEventListener('touchmove', onTouchMove);
-            window.removeEventListener('touchend', onTouchEnd);
+            elHit.removeEventListener('touchmove', onTouchMove);
+            elHit.removeEventListener('touchend', onTouchEnd);
             elHit.removeEventListener('keydown', onKeyDown);
         },
         view: function (_a) {
@@ -197,7 +211,7 @@ var mithrilSlider = function mithrilSlider() {
             value = quantize(value, min, max, step);
             var a = {
                 class: 'mithril-slider' + (attrs.class != null ? ' ' + attrs.class : ''),
-                tabIndex: '1',
+                tabIndex: '0',
                 role: 'slider',
                 'aria-valuemin': String(min),
                 'aria-valuemax': String(max),
