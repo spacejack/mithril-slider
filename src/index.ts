@@ -87,8 +87,8 @@ const mithrilSlider: m.FactoryComponent<Attrs> = function mithrilSlider() {
 
 	function onTouchStart (e: TouchEvent) {
 		if (device === MOUSE) return
-		window.addEventListener('touchmove', onTouchMove)
-		window.addEventListener('touchend', onTouchEnd)
+		elHit.addEventListener('touchmove', onTouchMove)
+		elHit.addEventListener('touchend', onTouchEnd)
 		const t = e.changedTouches[0]
 		onPress(t.clientX, t.clientY)
 	}
@@ -100,8 +100,8 @@ const mithrilSlider: m.FactoryComponent<Attrs> = function mithrilSlider() {
 	}
 
 	function onTouchEnd (e: TouchEvent) {
-		window.removeEventListener('touchmove', onTouchMove)
-		window.removeEventListener('touchend', onTouchEnd)
+		elHit.removeEventListener('touchmove', onTouchMove)
+		elHit.removeEventListener('touchend', onTouchEnd)
 		const t = e.changedTouches[0]
 		onRelease(t.clientX, t.clientY)
 	}
@@ -215,12 +215,12 @@ const mithrilSlider: m.FactoryComponent<Attrs> = function mithrilSlider() {
 		},
 
 		onremove() {
-			elHit.removeEventListener('mousedown', onMouseDown)
 			window.removeEventListener('mousemove', onMouseMove)
 			window.removeEventListener('mouseup', onMouseUp)
+			elHit.removeEventListener('mousedown', onMouseDown)
 			elHit.removeEventListener('touchstart', onTouchStart)
-			window.removeEventListener('touchmove', onTouchMove)
-			window.removeEventListener('touchend', onTouchEnd)
+			elHit.removeEventListener('touchmove', onTouchMove)
+			elHit.removeEventListener('touchend', onTouchEnd)
 			elHit.removeEventListener('keydown', onKeyDown)
 		},
 
