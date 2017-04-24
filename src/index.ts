@@ -80,6 +80,8 @@ const mithrilSlider: m.FactoryComponent<Attrs> = function mithrilSlider() {
 	let onchange: ((value: number) => false | any) | undefined
 	let ondrag: ((value: number) => false | any) | undefined
 
+	// Event handlers
+
 	function onMouseDown (e: MouseEvent) {
 		if (device === TOUCH) return
 		device = MOUSE
@@ -120,6 +122,46 @@ const mithrilSlider: m.FactoryComponent<Attrs> = function mithrilSlider() {
 		onRelease(t.clientX, t.clientY)
 	}
 
+	function onKeyDown (e: KeyboardEvent) {
+		const k = e.keyCode
+		let newVal: number | undefined
+		if (k === 33) { // pgup
+			e.preventDefault()
+			let s = Math.max((max - min) / 10, step)
+			if (s <= 0) s = 1
+			newVal = quantize(value + s, min, max, step)
+		} else if (k === 34) { // pgdown
+			e.preventDefault()
+			let s = Math.max((max - min) / 10, step)
+			if (s <= 0) s = 1
+			newVal = quantize(value - s, min, max, step)
+		} else if (k === 35) { // end
+			e.preventDefault()
+			newVal = max
+		} else if (k === 36) { // home
+			e.preventDefault()
+			newVal = min
+		} else if (k === 37 || k === 40) { // left/down
+			e.preventDefault()
+			const s = step > 0 ? step : (max - min) / 10
+			newVal = Math.max(value - s, min)
+		} else if (k === 38 || k === 39) { // right/up
+			e.preventDefault()
+			const s = step > 0 ? step : (max - min) / 10
+			newVal = Math.min(value + s, max)
+		}
+		if (typeof newVal !== 'number' || newVal === value) {
+			return // no change to make
+		}
+		value = newVal
+		elHandle.style[orientation === 'vertical' ? 'top' : 'left'] = positionStyle(value)
+		if (onchange && onchange(value) !== false) {
+			m.redraw()
+		}
+	}
+
+	// App handlers
+
 	function onPress (x: number, y: number) {
 		startValue = value
 		pressed = true
@@ -156,26 +198,6 @@ const mithrilSlider: m.FactoryComponent<Attrs> = function mithrilSlider() {
 		setTimeout(() => {
 			if (!pressed) device = NONE
 		}, DEVICE_DELAY)
-	}
-
-	function onKeyDown (e: KeyboardEvent) {
-		const k = e.keyCode
-		if (k < 37 || k > 40) return
-		const s = step > 0 ? step : (max - min) / 10
-		let newVal: number | undefined
-		if (k === 37 || k === 38) {
-			newVal = Math.max(value - s, min)
-		} else if (k === 39 || k === 40) {
-			newVal = Math.min(value + s, max)
-		}
-		if (typeof newVal === 'number' && newVal !== value) {
-			value = newVal
-			const s = orientation === 'vertical' ? 'top' : 'left'
-			elHandle.style[s] = positionStyle(value)
-			if (onchange && onchange(value) !== false) {
-				m.redraw()
-			}
-		}
 	}
 
 	function moveHandle (x: number, y: number) {

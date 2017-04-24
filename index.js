@@ -51,6 +51,7 @@ var mithrilSlider = function mithrilSlider() {
     var orientation = 'horizontal';
     var onchange;
     var ondrag;
+    // Event handlers
     function onMouseDown(e) {
         if (device === TOUCH)
             return;
@@ -87,6 +88,51 @@ var mithrilSlider = function mithrilSlider() {
         var t = e.changedTouches[0];
         onRelease(t.clientX, t.clientY);
     }
+    function onKeyDown(e) {
+        var k = e.keyCode;
+        var newVal;
+        if (k === 33) {
+            e.preventDefault();
+            var s = Math.max((max - min) / 10, step);
+            if (s <= 0)
+                s = 1;
+            newVal = quantize(value + s, min, max, step);
+        }
+        else if (k === 34) {
+            e.preventDefault();
+            var s = Math.max((max - min) / 10, step);
+            if (s <= 0)
+                s = 1;
+            newVal = quantize(value - s, min, max, step);
+        }
+        else if (k === 35) {
+            e.preventDefault();
+            newVal = max;
+        }
+        else if (k === 36) {
+            e.preventDefault();
+            newVal = min;
+        }
+        else if (k === 37 || k === 40) {
+            e.preventDefault();
+            var s = step > 0 ? step : (max - min) / 10;
+            newVal = Math.max(value - s, min);
+        }
+        else if (k === 38 || k === 39) {
+            e.preventDefault();
+            var s = step > 0 ? step : (max - min) / 10;
+            newVal = Math.min(value + s, max);
+        }
+        if (typeof newVal !== 'number' || newVal === value) {
+            return; // no change to make
+        }
+        value = newVal;
+        elHandle.style[orientation === 'vertical' ? 'top' : 'left'] = positionStyle(value);
+        if (onchange && onchange(value) !== false) {
+            m.redraw();
+        }
+    }
+    // App handlers
     function onPress(x, y) {
         startValue = value;
         pressed = true;
@@ -124,27 +170,6 @@ var mithrilSlider = function mithrilSlider() {
             if (!pressed)
                 device = NONE;
         }, DEVICE_DELAY);
-    }
-    function onKeyDown(e) {
-        var k = e.keyCode;
-        if (k < 37 || k > 40)
-            return;
-        var s = step > 0 ? step : (max - min) / 10;
-        var newVal;
-        if (k === 37 || k === 38) {
-            newVal = Math.max(value - s, min);
-        }
-        else if (k === 39 || k === 40) {
-            newVal = Math.min(value + s, max);
-        }
-        if (typeof newVal === 'number' && newVal !== value) {
-            value = newVal;
-            var s_1 = orientation === 'vertical' ? 'top' : 'left';
-            elHandle.style[s_1] = positionStyle(value);
-            if (onchange && onchange(value) !== false) {
-                m.redraw();
-            }
-        }
     }
     function moveHandle(x, y) {
         var barLength, delta, s;
