@@ -191,13 +191,12 @@ var mithrilSlider = function mithrilSlider() {
                 role: 'slider',
                 'aria-valuemin': String(min),
                 'aria-valuemax': String(max),
-                'aria-valuenow': String(value),
-                'aria-labelledby': attrs.ariaLabelledby,
+                'aria-valuenow': String(value)
             };
             if (attrs.id)
                 a.id = attrs.id;
             if (attrs.ariaLabelledby)
-                a.ariaLabelledby = attrs.ariaLabelledby;
+                a['aria-labelledby'] = attrs.ariaLabelledby;
             if (attrs.disabled) {
                 a.style = { pointerEvents: 'none' };
                 a['aria-disabled'] = 'true';
