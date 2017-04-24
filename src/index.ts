@@ -14,6 +14,20 @@ function clamp (n: number, min: number, max: number) {
 	return Math.min(Math.max(n, min), max)
 }
 
+const isIOS = !!navigator.userAgent.match(/iPhone|iPad|iPod/i)
+
+// This is some unbelievable stone-age nonsense.
+// Workaround for webkit bug where event.preventDefault
+// within touchmove handler fails to prevent scrolling.
+let iOSHackAdded = false
+function applyIOSHack() {
+	// Only apply this hack if iOS, haven't yet applied it,
+	// and only if a component is actually created
+	if (!isIOS || iOSHackAdded) return
+	window.addEventListener('touchmove', function(){})
+	iOSHackAdded = true
+}
+
 export interface Attrs {
 	/** Minimum value */
 	min: number
@@ -205,6 +219,7 @@ const mithrilSlider: m.FactoryComponent<Attrs> = function mithrilSlider() {
 	/** Return mithril component hooks object */
 	return {
 		oncreate ({attrs, dom}) {
+			applyIOSHack()
 			updateAttrs(attrs)
 			elHit = dom as HTMLElement
 			elBar = dom.querySelector('.mithril-slider-bar') as HTMLElement
@@ -229,7 +244,7 @@ const mithrilSlider: m.FactoryComponent<Attrs> = function mithrilSlider() {
 			value = quantize(value, min, max, step)
 			const a: {[id: string]: any} = {
 				class: 'mithril-slider' + (attrs.class != null ? ' ' + attrs.class : ''),
-				tabIndex: '1',
+				tabIndex: '0',
 				role: 'slider',
 				'aria-valuemin': String(min),
 				'aria-valuemax': String(max),
