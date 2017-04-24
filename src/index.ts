@@ -25,6 +25,8 @@ export interface Attrs {
 	step?: number
 	/** Optional CSS class to add to containing element */
 	class?: string
+	/** Optional disabled flag (default false) */
+	disabled?: boolean
 	/** Optional id attribute */
 	id?: string
 	/** Optional value for aria-labelledby attribute */
@@ -216,17 +218,22 @@ const mithrilSlider: m.FactoryComponent<Attrs> = function mithrilSlider() {
 		view ({attrs}) {
 			updateAttrs(attrs)
 			value = quantize(value, min, max, step)
-			const klass = 'mithril-slider' + (attrs.class != null ? ' ' + attrs.class : '')
-			return m('div',
-				{
-					class: klass,
-					tabIndex: 1,
-					id: attrs.id,
-					'aria-valuemin': String(min),
-					'aria-valuemax': String(max),
-					'aria-valuenow': String(value),
-					'aria-labelledby': attrs.ariaLabelledby
-				},
+			const a: {[id: string]: any} = {
+				class: 'mithril-slider' + (attrs.class != null ? ' ' + attrs.class : ''),
+				tabIndex: '1',
+				role: 'slider',
+				'aria-valuemin': String(min),
+				'aria-valuemax': String(max),
+				'aria-valuenow': String(value),
+				'aria-labelledby': attrs.ariaLabelledby,
+			}
+			if (attrs.id) a.id = attrs.id
+			if (attrs.ariaLabelledby) a.ariaLabelledby = attrs.ariaLabelledby
+			if (attrs.disabled) {
+				a.style = {pointerEvents: 'none'}
+				a['aria-disabled'] = 'true'
+			}
+			return m('div', a,
 				m('div', {class: 'mithril-slider-bar'},
 					m('div', {
 						class: 'mithril-slider-handle',

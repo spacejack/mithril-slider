@@ -11,6 +11,8 @@ export interface Attrs {
     step?: number;
     /** Optional CSS class to add to containing element */
     class?: string;
+    /** Optional disabled flag (default false) */
+    disabled?: boolean;
     /** Optional id attribute */
     id?: string;
     /** Optional value for aria-labelledby attribute */

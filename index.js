@@ -185,16 +185,24 @@ var mithrilSlider = function mithrilSlider() {
             var attrs = _a.attrs;
             updateAttrs(attrs);
             value = quantize(value, min, max, step);
-            var klass = 'mithril-slider' + (attrs.class != null ? ' ' + attrs.class : '');
-            return m('div', {
-                class: klass,
-                tabIndex: 1,
-                id: attrs.id,
+            var a = {
+                class: 'mithril-slider' + (attrs.class != null ? ' ' + attrs.class : ''),
+                tabIndex: '1',
+                role: 'slider',
                 'aria-valuemin': String(min),
                 'aria-valuemax': String(max),
                 'aria-valuenow': String(value),
-                'aria-labelledby': attrs.ariaLabelledby
-            }, m('div', { class: 'mithril-slider-bar' }, m('div', {
+                'aria-labelledby': attrs.ariaLabelledby,
+            };
+            if (attrs.id)
+                a.id = attrs.id;
+            if (attrs.ariaLabelledby)
+                a.ariaLabelledby = attrs.ariaLabelledby;
+            if (attrs.disabled) {
+                a.style = { pointerEvents: 'none' };
+                a['aria-disabled'] = 'true';
+            }
+            return m('div', a, m('div', { class: 'mithril-slider-bar' }, m('div', {
                 class: 'mithril-slider-handle',
                 style: {
                     left: positionStyle(value)
