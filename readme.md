@@ -27,7 +27,7 @@ import slider from 'mithril-slider'
 let myValue = 0
 
 m(slider, {
-  min: 1,
+  min: 0,
   max: 10,
   step: 1,
   value: myValue,
@@ -56,6 +56,8 @@ interface Attrs {
   value?: number
   /** Step size (default 1). 0 means fractions as small as possible. */
   step?: number
+  /** Orientation: horizontal or vertical (default horizontal.) */
+  orientation?: 'horizontal' | 'vertical'
   /** Optional CSS class to add to containing element */
   class?: string
   /** Optional disabled flag (default false) */
@@ -70,6 +72,8 @@ interface Attrs {
   ondrag? (value: number): false | any
 }
 ```
+
+By default the base CSS assumes a horizontal orientation. See the example app included in the repo which includes CSS for a vertical slider.
 
 This module was written in Typescript and includes types. (It also works with plain Javascript.)
 

@@ -23,6 +23,8 @@ export interface Attrs {
 	value?: number
 	/** Step size (default 1). 0 means fractions as small as possible. */
 	step?: number
+	/** Orientation: horizontal or vertical (default horizontal.) */
+	orientation?: 'horizontal' | 'vertical'
 	/** Optional CSS class to add to containing element */
 	class?: string
 	/** Optional disabled flag (default false) */
@@ -60,6 +62,7 @@ const mithrilSlider: m.FactoryComponent<Attrs> = function mithrilSlider() {
 	let value = 0
 	let startValue = 0
 	let step = 1
+	let orientation: 'horizontal' | 'vertical' = 'horizontal'
 	let onchange: ((value: number) => false | any) | undefined
 	let ondrag: ((value: number) => false | any) | undefined
 
@@ -106,6 +109,7 @@ const mithrilSlider: m.FactoryComponent<Attrs> = function mithrilSlider() {
 	function onPress (x: number, y: number) {
 		startValue = value
 		pressed = true
+		rcBar = elBar.getBoundingClientRect()
 		const val = moveHandle(x, y)
 		if (val !== value) {
 			value = val
@@ -152,7 +156,8 @@ const mithrilSlider: m.FactoryComponent<Attrs> = function mithrilSlider() {
 		}
 		if (typeof newVal === 'number' && newVal !== value) {
 			value = newVal
-			elHandle.style.left = positionStyle(value)
+			const s = orientation === 'vertical' ? 'top' : 'left'
+			elHandle.style[s] = positionStyle(value)
 			if (onchange && onchange(value) !== false) {
 				m.redraw()
 			}
@@ -160,16 +165,27 @@ const mithrilSlider: m.FactoryComponent<Attrs> = function mithrilSlider() {
 	}
 
 	function moveHandle (x: number, y: number) {
-		const barWidth = rcBar.right - rcBar.left
-		const hx = clamp(x - rcBar.left, 0, barWidth)
-		const val = quantize((hx / barWidth) * (max - min) + min, min, max, step)
-		elHandle.style.left = positionStyle(val)
+		let barLength: number, delta: number, s: string
+		if (orientation === 'vertical') {
+			barLength = rcBar.bottom - rcBar.top
+			delta = rcBar.bottom - y
+			s = 'top'
+		} else {
+			barLength = rcBar.right - rcBar.left
+			delta = x - rcBar.left
+			s = 'left'
+		}
+		delta = clamp(delta, 0, barLength)
+		const val = quantize((delta / barLength) * (max - min) + min, min, max, step)
+		elHandle.style[s] = positionStyle(val)
 		return val
 	}
 
 	/** Compute handle position style */
 	function positionStyle (val: number) {
-		return String(100 * (val - min) / (max - min)) + '%'
+		let s = (val - min) / (max - min)
+		if (orientation === 'vertical') s = 1.0 - s
+		return String(100 * s) + '%'
 	}
 
 	/** Some attrs need to be cached (and updated) so that they are current in event handlers */
@@ -178,16 +194,12 @@ const mithrilSlider: m.FactoryComponent<Attrs> = function mithrilSlider() {
 		max = attrs.max
 		step = (typeof attrs.step === 'number' && !Number.isNaN(attrs.step))
 			? clamp(attrs.step, 0, max - min) : 1
+		orientation = attrs.orientation === 'vertical' ? 'vertical' : 'horizontal'
 		onchange = attrs.onchange
 		ondrag = attrs.ondrag
 		if (typeof attrs.value === 'number') {
 			value = clamp(attrs.value, min, max)
 		}
-	}
-
-	/** Need to keep bar size up to date */
-	function resize() {
-		rcBar = elBar.getBoundingClientRect()
 	}
 
 	/** Return mithril component hooks object */
@@ -200,8 +212,6 @@ const mithrilSlider: m.FactoryComponent<Attrs> = function mithrilSlider() {
 			elHit.addEventListener('mousedown', onMouseDown)
 			elHit.addEventListener('touchstart', onTouchStart)
 			elHit.addEventListener('keydown', onKeyDown)
-			window.addEventListener('resize', resize)
-			resize()
 		},
 
 		onremove() {
@@ -212,7 +222,6 @@ const mithrilSlider: m.FactoryComponent<Attrs> = function mithrilSlider() {
 			window.removeEventListener('touchmove', onTouchMove)
 			window.removeEventListener('touchend', onTouchEnd)
 			elHit.removeEventListener('keydown', onKeyDown)
-			window.removeEventListener('resize', resize)
 		},
 
 		view ({attrs}) {
@@ -224,7 +233,8 @@ const mithrilSlider: m.FactoryComponent<Attrs> = function mithrilSlider() {
 				role: 'slider',
 				'aria-valuemin': String(min),
 				'aria-valuemax': String(max),
-				'aria-valuenow': String(value)
+				'aria-valuenow': String(value),
+				'aria-orientation': orientation
 			}
 			if (attrs.id) a.id = attrs.id
 			if (attrs.ariaLabelledby) a['aria-labelledby'] = attrs.ariaLabelledby
@@ -232,13 +242,14 @@ const mithrilSlider: m.FactoryComponent<Attrs> = function mithrilSlider() {
 				a.style = {pointerEvents: 'none'}
 				a['aria-disabled'] = 'true'
 			}
+			const ps = positionStyle(value)
+			const bs = orientation === 'vertical'
+				? {top: ps} : {left: ps}
 			return m('div', a,
 				m('div', {class: 'mithril-slider-bar'},
 					m('div', {
 						class: 'mithril-slider-handle',
-						style: {
-							left: positionStyle(value)
-						}
+						style: bs
 					})
 				)
 			)

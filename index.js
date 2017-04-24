@@ -35,6 +35,7 @@ var mithrilSlider = function mithrilSlider() {
     var value = 0;
     var startValue = 0;
     var step = 1;
+    var orientation = 'horizontal';
     var onchange;
     var ondrag;
     function onMouseDown(e) {
@@ -76,6 +77,7 @@ var mithrilSlider = function mithrilSlider() {
     function onPress(x, y) {
         startValue = value;
         pressed = true;
+        rcBar = elBar.getBoundingClientRect();
         var val = moveHandle(x, y);
         if (val !== value) {
             value = val;
@@ -124,22 +126,36 @@ var mithrilSlider = function mithrilSlider() {
         }
         if (typeof newVal === 'number' && newVal !== value) {
             value = newVal;
-            elHandle.style.left = positionStyle(value);
+            var s_1 = orientation === 'vertical' ? 'top' : 'left';
+            elHandle.style[s_1] = positionStyle(value);
             if (onchange && onchange(value) !== false) {
                 m.redraw();
             }
         }
     }
     function moveHandle(x, y) {
-        var barWidth = rcBar.right - rcBar.left;
-        var hx = clamp(x - rcBar.left, 0, barWidth);
-        var val = quantize((hx / barWidth) * (max - min) + min, min, max, step);
-        elHandle.style.left = positionStyle(val);
+        var barLength, delta, s;
+        if (orientation === 'vertical') {
+            barLength = rcBar.bottom - rcBar.top;
+            delta = rcBar.bottom - y;
+            s = 'top';
+        }
+        else {
+            barLength = rcBar.right - rcBar.left;
+            delta = x - rcBar.left;
+            s = 'left';
+        }
+        delta = clamp(delta, 0, barLength);
+        var val = quantize((delta / barLength) * (max - min) + min, min, max, step);
+        elHandle.style[s] = positionStyle(val);
         return val;
     }
     /** Compute handle position style */
     function positionStyle(val) {
-        return String(100 * (val - min) / (max - min)) + '%';
+        var s = (val - min) / (max - min);
+        if (orientation === 'vertical')
+            s = 1.0 - s;
+        return String(100 * s) + '%';
     }
     /** Some attrs need to be cached (and updated) so that they are current in event handlers */
     function updateAttrs(attrs) {
@@ -147,15 +163,12 @@ var mithrilSlider = function mithrilSlider() {
         max = attrs.max;
         step = (typeof attrs.step === 'number' && !Number.isNaN(attrs.step))
             ? clamp(attrs.step, 0, max - min) : 1;
+        orientation = attrs.orientation === 'vertical' ? 'vertical' : 'horizontal';
         onchange = attrs.onchange;
         ondrag = attrs.ondrag;
         if (typeof attrs.value === 'number') {
             value = clamp(attrs.value, min, max);
         }
-    }
-    /** Need to keep bar size up to date */
-    function resize() {
-        rcBar = elBar.getBoundingClientRect();
     }
     /** Return mithril component hooks object */
     return {
@@ -168,8 +181,6 @@ var mithrilSlider = function mithrilSlider() {
             elHit.addEventListener('mousedown', onMouseDown);
             elHit.addEventListener('touchstart', onTouchStart);
             elHit.addEventListener('keydown', onKeyDown);
-            window.addEventListener('resize', resize);
-            resize();
         },
         onremove: function () {
             elHit.removeEventListener('mousedown', onMouseDown);
@@ -179,7 +190,6 @@ var mithrilSlider = function mithrilSlider() {
             window.removeEventListener('touchmove', onTouchMove);
             window.removeEventListener('touchend', onTouchEnd);
             elHit.removeEventListener('keydown', onKeyDown);
-            window.removeEventListener('resize', resize);
         },
         view: function (_a) {
             var attrs = _a.attrs;
@@ -191,7 +201,8 @@ var mithrilSlider = function mithrilSlider() {
                 role: 'slider',
                 'aria-valuemin': String(min),
                 'aria-valuemax': String(max),
-                'aria-valuenow': String(value)
+                'aria-valuenow': String(value),
+                'aria-orientation': orientation
             };
             if (attrs.id)
                 a.id = attrs.id;
@@ -201,11 +212,12 @@ var mithrilSlider = function mithrilSlider() {
                 a.style = { pointerEvents: 'none' };
                 a['aria-disabled'] = 'true';
             }
+            var ps = positionStyle(value);
+            var bs = orientation === 'vertical'
+                ? { top: ps } : { left: ps };
             return m('div', a, m('div', { class: 'mithril-slider-bar' }, m('div', {
                 class: 'mithril-slider-handle',
-                style: {
-                    left: positionStyle(value)
-                }
+                style: bs
             })));
         }
     };

@@ -9,6 +9,8 @@ export interface Attrs {
     value?: number;
     /** Step size (default 1). 0 means fractions as small as possible. */
     step?: number;
+    /** Orientation: horizontal or vertical (default horizontal.) */
+    orientation?: 'horizontal' | 'vertical';
     /** Optional CSS class to add to containing element */
     class?: string;
     /** Optional disabled flag (default false) */
