@@ -38,6 +38,8 @@ exports.quantize = quantize;
 var mithrilSlider = function mithrilSlider() {
     var elHit;
     var elBar;
+    var elBar0;
+    var elBar1;
     var elHandle;
     var rcBar;
     var device = NONE;
@@ -127,7 +129,7 @@ var mithrilSlider = function mithrilSlider() {
             return; // no change to make
         }
         value = newVal;
-        elHandle.style[orientation === 'vertical' ? 'top' : 'left'] = positionStyle(value);
+        setStyles(value);
         if (onchange && onchange(value) !== false) {
             m.redraw();
         }
@@ -185,7 +187,7 @@ var mithrilSlider = function mithrilSlider() {
         }
         delta = clamp(delta, 0, barLength);
         var val = quantize((delta / barLength) * (max - min) + min, min, max, step);
-        elHandle.style[s] = positionStyle(val);
+        setStyles(val);
         return val;
     }
     /** Compute handle position style */
@@ -194,6 +196,22 @@ var mithrilSlider = function mithrilSlider() {
         if (orientation === 'vertical')
             s = 1.0 - s;
         return String(100 * s) + '%';
+    }
+    /** Set styles for movable parts */
+    function setStyles(value) {
+        var ps = positionStyle(value);
+        var rps = positionStyle(max - (value - min) + min);
+        var handleStyle, bar0Style, bar1Style;
+        if (orientation === 'vertical') {
+            elHandle.style.top = ps;
+            elBar0.style.height = ps;
+            elBar1.style.height = rps;
+        }
+        else {
+            elHandle.style.left = ps;
+            elBar0.style.width = rps;
+            elBar1.style.width = ps;
+        }
     }
     /** Some attrs need to be cached (and updated) so that they are current in event handlers */
     function updateAttrs(attrs) {
@@ -215,8 +233,10 @@ var mithrilSlider = function mithrilSlider() {
             applyIOSHack();
             updateAttrs(attrs);
             elHit = dom;
-            elBar = dom.querySelector('.mithril-slider-bar');
-            elHandle = dom.querySelector('.mithril-slider-handle');
+            elBar = elHit.querySelector('.mithril-slider-bar');
+            elBar0 = elBar.querySelector('.mithril-slider-bar-0');
+            elBar1 = elBar.querySelector('.mithril-slider-bar-1');
+            elHandle = elBar.querySelector('.mithril-slider-handle');
             elHit.addEventListener('mousedown', onMouseDown);
             elHit.addEventListener('touchstart', onTouchStart);
             elHit.addEventListener('keydown', onKeyDown);
@@ -252,11 +272,27 @@ var mithrilSlider = function mithrilSlider() {
                 a['aria-disabled'] = 'true';
             }
             var ps = positionStyle(value);
-            var bs = orientation === 'vertical'
-                ? { top: ps } : { left: ps };
+            var rps = positionStyle(max - (value - min) + min);
+            var handleStyle, bar0Style, bar1Style;
+            if (orientation === 'vertical') {
+                handleStyle = { top: ps };
+                bar0Style = { height: ps };
+                bar1Style = { height: rps };
+            }
+            else {
+                handleStyle = { left: ps };
+                bar0Style = { width: rps };
+                bar1Style = { width: ps };
+            }
             return m('div', a, m('div', { class: 'mithril-slider-bar' }, m('div', {
+                class: 'mithril-slider-bar-0',
+                style: bar0Style
+            }), m('div', {
+                class: 'mithril-slider-bar-1',
+                style: bar1Style
+            }), m('div', {
                 class: 'mithril-slider-handle',
-                style: bs
+                style: handleStyle
             })));
         }
     };

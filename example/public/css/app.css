@@ -26,6 +26,8 @@ input[type=text] {
 }
 
 /* Classes to add to or override mithril-slider styles */
+
+/* Horizontal - some simple colour changes */
 .horizontal-slider {
 	background-color: #F8F8F8;
 }
@@ -36,6 +38,7 @@ input[type=text] {
 	background-color: #FF4;
 }
 
+/* Vertical - for this orientation we need to override some horizontal layout defaults. */
 .vertical-slider {
 	width: 3em;
 	height: 10em;
@@ -46,6 +49,20 @@ input[type=text] {
 .vertical-slider .mithril-slider-bar {
 	width: 0.25em;
 	height: 100%;
+}
+.vertical-slider .mithril-slider-bar-0 {
+	top: 0;
+	left: 0;
+	bottom: auto;
+	right: auto;
+	width: 100%;
+}
+.vertical-slider .mithril-slider-bar-1 {
+	top: auto;
+	left: 0;
+	bottom: 0;
+	right: auto;
+	width: 100%;
 }
 .vertical-slider .mithril-slider-handle {
 	margin-left: -0.625em;

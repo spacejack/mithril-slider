@@ -66,6 +66,8 @@ export function quantize (val: number, min: number, max: number, step: number) {
 const mithrilSlider: m.FactoryComponent<Attrs> = function mithrilSlider() {
 	let elHit: HTMLElement
 	let elBar: HTMLElement
+	let elBar0: HTMLElement
+	let elBar1: HTMLElement
 	let elHandle: HTMLElement
 	let rcBar: ClientRect
 	let device: Devices = NONE
@@ -154,7 +156,7 @@ const mithrilSlider: m.FactoryComponent<Attrs> = function mithrilSlider() {
 			return // no change to make
 		}
 		value = newVal
-		elHandle.style[orientation === 'vertical' ? 'top' : 'left'] = positionStyle(value)
+		setStyles(value)
 		if (onchange && onchange(value) !== false) {
 			m.redraw()
 		}
@@ -213,7 +215,7 @@ const mithrilSlider: m.FactoryComponent<Attrs> = function mithrilSlider() {
 		}
 		delta = clamp(delta, 0, barLength)
 		const val = quantize((delta / barLength) * (max - min) + min, min, max, step)
-		elHandle.style[s] = positionStyle(val)
+		setStyles(val)
 		return val
 	}
 
@@ -222,6 +224,22 @@ const mithrilSlider: m.FactoryComponent<Attrs> = function mithrilSlider() {
 		let s = (val - min) / (max - min)
 		if (orientation === 'vertical') s = 1.0 - s
 		return String(100 * s) + '%'
+	}
+
+	/** Set styles for movable parts */
+	function setStyles (value: number) {
+		const ps = positionStyle(value)
+		const rps = positionStyle(max - (value - min) + min)
+		let handleStyle: any, bar0Style: any, bar1Style: any
+		if (orientation === 'vertical') {
+			elHandle.style.top = ps
+			elBar0.style.height = ps
+			elBar1.style.height = rps
+		} else {
+			elHandle.style.left = ps
+			elBar0.style.width = rps
+			elBar1.style.width = ps
+		}
 	}
 
 	/** Some attrs need to be cached (and updated) so that they are current in event handlers */
@@ -244,8 +262,10 @@ const mithrilSlider: m.FactoryComponent<Attrs> = function mithrilSlider() {
 			applyIOSHack()
 			updateAttrs(attrs)
 			elHit = dom as HTMLElement
-			elBar = dom.querySelector('.mithril-slider-bar') as HTMLElement
-			elHandle = dom.querySelector('.mithril-slider-handle') as HTMLElement
+			elBar = elHit.querySelector('.mithril-slider-bar') as HTMLElement
+			elBar0 = elBar.querySelector('.mithril-slider-bar-0') as HTMLElement
+			elBar1 = elBar.querySelector('.mithril-slider-bar-1') as HTMLElement
+			elHandle = elBar.querySelector('.mithril-slider-handle') as HTMLElement
 			elHit.addEventListener('mousedown', onMouseDown)
 			elHit.addEventListener('touchstart', onTouchStart)
 			elHit.addEventListener('keydown', onKeyDown)
@@ -280,13 +300,30 @@ const mithrilSlider: m.FactoryComponent<Attrs> = function mithrilSlider() {
 				a['aria-disabled'] = 'true'
 			}
 			const ps = positionStyle(value)
-			const bs = orientation === 'vertical'
-				? {top: ps} : {left: ps}
+			const rps = positionStyle(max - (value - min) + min)
+			let handleStyle: any, bar0Style: any, bar1Style: any
+			if (orientation === 'vertical') {
+				handleStyle = {top: ps}
+				bar0Style = {height: ps}
+				bar1Style = {height: rps}
+			} else {
+				handleStyle = {left: ps}
+				bar0Style = {width: rps}
+				bar1Style = {width: ps}
+			}
 			return m('div', a,
 				m('div', {class: 'mithril-slider-bar'},
 					m('div', {
+						class: 'mithril-slider-bar-0',
+						style: bar0Style
+					}),
+					m('div', {
+						class: 'mithril-slider-bar-1',
+						style: bar1Style
+					}),
+					m('div', {
 						class: 'mithril-slider-handle',
-						style: bs
+						style: handleStyle
 					})
 				)
 			)

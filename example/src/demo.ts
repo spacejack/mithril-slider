@@ -32,7 +32,7 @@ export default {
 					ondrag: (val: number) => {
 						value1(val)
 						// Could prevent redraw here by returning false
-						// return false
+						return false
 					}
 				}),
 				m('.config',
