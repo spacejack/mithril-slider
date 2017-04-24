@@ -17,18 +17,43 @@ input[type=text] {
 	box-sizing: border-box;
 }
 
+.demo h2 {
+	margin-left: 0.75em;
+}
+
 .config {
 	margin: 1em;
 }
 
 /* Classes to add to or override mithril-slider styles */
-.app-slider {
+.horizontal-slider {
 	background-color: #F8F8F8;
 }
-
-.app-slider .mithril-slider-handle {
+.horizontal-slider .mithril-slider-handle {
 	background-color: rgba(255,255,255,0.5);
 }
-.app-slider:active .mithril-slider-handle {
+.horizontal-slider:active .mithril-slider-handle {
+	background-color: #FF4;
+}
+
+.vertical-slider {
+	width: 3em;
+	height: 10em;
+	padding: 1em 1.375em;
+	background-color: #F8F8F8;
+	margin-left: 1em;
+}
+.vertical-slider .mithril-slider-bar {
+	width: 0.25em;
+	height: 100%;
+}
+.vertical-slider .mithril-slider-handle {
+	margin-left: -0.625em;
+	margin-top: -0.375em;
+	width: 1.5em;
+	height: 0.75em;
+	background-color: rgba(255,255,255,0.5);
+}
+.vertical-slider:active .mithril-slider-handle {
 	background-color: #FF4;
 }
