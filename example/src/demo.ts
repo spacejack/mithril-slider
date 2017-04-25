@@ -5,11 +5,12 @@ import slider from '../../src'
 // sync our app values with possible slider values.
 import {quantize} from '../../src'
 
+// Horizontal slider values
 const value1 = stream(0)
 const min1 = stream(0)
 const max1 = stream(100)
 const step1 = stream(1)
-
+// Vertical slider values
 const value2 = stream(0)
 const min2 = stream(0)
 const max2 = stream(100)
@@ -31,7 +32,7 @@ export default {
 					onchange: value1,
 					ondrag: (val: number) => {
 						value1(val)
-						// Could prevent redraw here by returning false
+						// Prevent redraws while dragging by returning false
 						return false
 					}
 				}),
@@ -96,7 +97,7 @@ export default {
 				)
 			),
 			// Vertical demo
-			m('.demo',
+			m('.demo', {style: {marginTop: '0.5em'}},
 				m('h2', "Vertical"),
 				m(slider, {
 					class: 'vertical-slider',
@@ -107,11 +108,7 @@ export default {
 					value: value2(),
 					id: 'vertical-slider',
 					onchange: value2,
-					ondrag: (val: number) => {
-						value2(val)
-						// Could prevent redraw here by returning false
-						// return false
-					}
+					ondrag: value2
 				}),
 				m('.config',
 					m('p',

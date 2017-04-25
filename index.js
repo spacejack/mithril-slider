@@ -1,3 +1,9 @@
+///////////////////////////////////////////////
+// Mithril Slider
+// (c) 2017 by Mike Linkovich
+// https://github.com/spacejack/mithril-slider
+// License: MIT
+///////////////////////////////////////////////
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var m = require("mithril");
@@ -14,14 +20,14 @@ var isIOS = !!navigator.userAgent.match(/iPhone|iPad|iPod/i);
 // This is some unbelievable stone-age nonsense.
 // Workaround for webkit bug where event.preventDefault
 // within touchmove handler fails to prevent scrolling.
-var iOSHackAdded = false;
+var iOSHackApplied = false;
 function applyIOSHack() {
     // Only apply this hack if iOS, haven't yet applied it,
     // and only if a component is actually created
-    if (!isIOS || iOSHackAdded)
+    if (!isIOS || iOSHackApplied)
         return;
     window.addEventListener('touchmove', function () { });
-    iOSHackAdded = true;
+    iOSHackApplied = true;
 }
 /** Given an input value, quantize it to the step size */
 function quantize(val, min, max, step) {
@@ -200,8 +206,7 @@ var mithrilSlider = function mithrilSlider() {
     /** Set styles for movable parts */
     function setStyles(value) {
         var ps = positionStyle(value);
-        var rps = positionStyle(max - (value - min) + min);
-        var handleStyle, bar0Style, bar1Style;
+        var rps = positionStyle(max - value + min);
         if (orientation === 'vertical') {
             elHandle.style.top = ps;
             elBar0.style.height = ps;
@@ -272,7 +277,7 @@ var mithrilSlider = function mithrilSlider() {
                 a['aria-disabled'] = 'true';
             }
             var ps = positionStyle(value);
-            var rps = positionStyle(max - (value - min) + min);
+            var rps = positionStyle(max - value + min);
             var handleStyle, bar0Style, bar1Style;
             if (orientation === 'vertical') {
                 handleStyle = { top: ps };

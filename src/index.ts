@@ -1,3 +1,10 @@
+///////////////////////////////////////////////
+// Mithril Slider
+// (c) 2017 by Mike Linkovich
+// https://github.com/spacejack/mithril-slider
+// License: MIT
+///////////////////////////////////////////////
+
 import * as m from 'mithril'
 
 type Devices = 0 | 1 | 2
@@ -19,13 +26,13 @@ const isIOS = !!navigator.userAgent.match(/iPhone|iPad|iPod/i)
 // This is some unbelievable stone-age nonsense.
 // Workaround for webkit bug where event.preventDefault
 // within touchmove handler fails to prevent scrolling.
-let iOSHackAdded = false
+let iOSHackApplied = false
 function applyIOSHack() {
 	// Only apply this hack if iOS, haven't yet applied it,
 	// and only if a component is actually created
-	if (!isIOS || iOSHackAdded) return
+	if (!isIOS || iOSHackApplied) return
 	window.addEventListener('touchmove', function(){})
-	iOSHackAdded = true
+	iOSHackApplied = true
 }
 
 export interface Attrs {
@@ -229,8 +236,7 @@ const mithrilSlider: m.FactoryComponent<Attrs> = function mithrilSlider() {
 	/** Set styles for movable parts */
 	function setStyles (value: number) {
 		const ps = positionStyle(value)
-		const rps = positionStyle(max - (value - min) + min)
-		let handleStyle: any, bar0Style: any, bar1Style: any
+		const rps = positionStyle(max - value + min)
 		if (orientation === 'vertical') {
 			elHandle.style.top = ps
 			elBar0.style.height = ps
@@ -300,7 +306,7 @@ const mithrilSlider: m.FactoryComponent<Attrs> = function mithrilSlider() {
 				a['aria-disabled'] = 'true'
 			}
 			const ps = positionStyle(value)
-			const rps = positionStyle(max - (value - min) + min)
+			const rps = positionStyle(max - value + min)
 			let handleStyle: any, bar0Style: any, bar1Style: any
 			if (orientation === 'vertical') {
 				handleStyle = {top: ps}
